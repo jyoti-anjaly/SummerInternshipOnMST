@@ -11,7 +11,7 @@
 #include <bits/stdc++.h>
 #include <iostream>
 using namespace  std;
-vector<vector<int > > gereate_points_of_one_plane(vector<int >p1 , vector<int>p2 , vector<int>p3)
+vector<vector<int > > generate_points_of_one_plane(vector<int >p1 , vector<int>p2 , vector<int>p3)
 {
     vector<vector<int>>ans;
     ans.push_back(p1);
@@ -47,13 +47,13 @@ vector<vector<vector<int >>> generate_plane(vector<int>fourth_points , vector<ve
     
     // vector<vector<int>>temp;
     temp.clear();
-    temp = gereate_points_of_one_plane(fourth_points ,three_point[0] , three_point[1] );
+    temp = generate_points_of_one_plane(fourth_points ,three_point[0] , three_point[1] );
     ans.push_back(temp);
 
-     temp = gereate_points_of_one_plane(fourth_points ,three_point[1] , three_point[2] );
+     temp = generate_points_of_one_plane(fourth_points ,three_point[1] , three_point[2] );
     ans.push_back(temp);
 
-    temp = gereate_points_of_one_plane(fourth_points ,three_point[0] , three_point[2] );
+    temp = generate_points_of_one_plane(fourth_points ,three_point[0] , three_point[2] );
     ans.push_back(temp);
     return ans;
     //otherwise we will generate the point(it comprises of three points) of three planes 
@@ -357,7 +357,7 @@ vector<vector<int> > creat_graph(map< pair<int ,int > , vector<int > >&vector_we
 vector<vector<int>> BFS(vector<vector<int >> initial_three_point ,   map<pair<int ,int >  , vector<int > >vector_weight_map)
 {
 
-    //it will return the set of the extreaml points 
+    //it will return the set of the extremal points 
 
     //we wiil use the queue data structure for solving EST like we so BFS 
     //que.push({plane which are at infinite disatance })--> starting 
@@ -408,7 +408,8 @@ vector<vector<int>> BFS(vector<vector<int >> initial_three_point ,   map<pair<in
 
 int main()
 {
-   
+    std::ifstream myfile; myfile.open("text.txt");
+
     vector<vector<int>>graph;//in this graph variable i will store the graph returned by the creat_graph function .
 
     map<pair<int ,int >  , vector<int > >vector_weight_map;//we will this as a reference the after graph will be created 
