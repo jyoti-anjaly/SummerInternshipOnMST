@@ -11,7 +11,7 @@
 #include <bits/stdc++.h>
 #include <iostream>
 using namespace  std;
-vector<vector<int > > generate_points_of_one_plane(vector<int >p1 , vector<int>p2 , vector<int>p3)
+vector<vector<int > > gereate_points_of_one_plane(vector<int >p1 , vector<int>p2 , vector<int>p3)
 {
     vector<vector<int>>ans;
     ans.push_back(p1);
@@ -47,13 +47,13 @@ vector<vector<vector<int >>> generate_plane(vector<int>fourth_points , vector<ve
     
     // vector<vector<int>>temp;
     temp.clear();
-    temp = generate_points_of_one_plane(fourth_points ,three_point[0] , three_point[1] );
+    temp = gereate_points_of_one_plane(fourth_points ,three_point[0] , three_point[1] );
     ans.push_back(temp);
 
-     temp = generate_points_of_one_plane(fourth_points ,three_point[1] , three_point[2] );
+     temp = gereate_points_of_one_plane(fourth_points ,three_point[1] , three_point[2] );
     ans.push_back(temp);
 
-    temp = generate_points_of_one_plane(fourth_points ,three_point[0] , three_point[2] );
+    temp = gereate_points_of_one_plane(fourth_points ,three_point[0] , three_point[2] );
     ans.push_back(temp);
     return ans;
     //otherwise we will generate the point(it comprises of three points) of three planes 
@@ -142,24 +142,9 @@ vector<int> find_normal_vector(vector<vector<int >> &three_points)
     ans.push_back(l2);
     ans.push_back(l3);
     return ans;
-    // cout<<"value of lambda 1 is: "<<l1<<"\nvalue of lambda 2 is: "<<l2<<"\nvalue of lambda 3 is: "<<l3;
-    /* for example
-    x1=2;
-    y1=3;
-    z1=7;
-    x2=2;
-    y2=3;
-    z2=4;
-    x3=5;
-    y3=4;
-    z3=6;
-    then values of lambda are 
-    value of lambda 1 is: 0.316228
-    value of lambda 2 is: -0.948683
-    value of lambda 3 is: 0 */
 }
-
-map<pair<int ,int > , int > find_weightedSum(vector<vector<int >>MST,  map<pair<int ,int >  , vector<int > >vector_weight_map , vector<int>normal_vector)
+//there is no need to pass the MST we need to normalize the weight of the each edge present in the graph
+map<pair<int ,int > , int > find_weightedSum(map<pair<int ,int >  , vector<int > >vector_weight_map , vector<int>normal_vector)
 {
     //graph and the normal vector will be given 
     // then we will normalize the weight and return it 
@@ -175,24 +160,24 @@ map<pair<int ,int > , int > find_weightedSum(vector<vector<int >>MST,  map<pair<
     l2 = normal_vector[1];
     l3 = normal_vector[2];
     int x , y , z , i;
-    int n = MST.size();
-    for(i=0; i<n; i++)
+    for(auto itr:vector_weight_map)
     {
-        pair<int ,int> edge;
-        edge.first = MST[i][0];
-        edge.second = MST[i][1];
-        vector<int >temp;
-        if(vector_weight_map.find({edge.first ,edge.second}) != vector_weight_map.end())
-        {
-            auto itr1 = vector_weight_map.find({edge.first ,edge.second});
-            // itr = itr1;
-            temp = itr1->second;
-        }
-        else{
-            auto itr2 = vector_weight_map.find({edge.second ,edge.first});
-            // itr = itr2;
-            temp = itr2->second;
-        }
+        pair<int ,int> edge = itr.first;
+        vector<int >temp = itr.second;
+        // edge.first = MST[i][0];
+        // edge.second = MST[i][1];
+        
+        // if(vector_weight_map.find({edge.first ,edge.second}) != vector_weight_map.end())
+        // {
+        //     auto itr1 = vector_weight_map.find({edge.first ,edge.second});
+        //     // itr = itr1;
+        //     temp = itr1->second;
+        // }
+        // else{
+        //     auto itr2 = vector_weight_map.find({edge.second ,edge.first});
+        //     // itr = itr2;
+        //     temp = itr2->second;
+        // }
 
         x = temp[0];
         y = temp[1];
@@ -202,12 +187,7 @@ map<pair<int ,int > , int > find_weightedSum(vector<vector<int >>MST,  map<pair<
         
     }
     return ans;
-    // for(int i=0;i<n;i++)
-    // {
-    //     sum = x*l1 + y*l2 + z*l3;
-    // }
 
-    // cout<<sum;
 }
 
 /* finding the minimum spanning tree */
@@ -216,10 +196,11 @@ void print_MST(vector<vector<int> > &MST_edge)
 {
     int n = MST_edge.size();
     int i;
+    cout<<"source node:      destination node:       and their weight:\n";
     for(i=0; i<n; i++)
     {
-        cout<<"source node :- "<<MST_edge[i][0]<<" Destination node :- ";
-        cout<<MST_edge[i][1]<<" weight associated with it "<<MST_edge[i][2]<<endl;
+        cout<<"         "<<MST_edge[i][0]<<"               ";
+        cout<<MST_edge[i][1]<<"                      "<<MST_edge[i][2]<<endl;
 
     }
 }
@@ -353,11 +334,27 @@ vector<vector<int> > creat_graph(map< pair<int ,int > , vector<int > >&vector_we
     }
     return graph;
 }
-
-vector<vector<int>> BFS(vector<vector<int >> initial_three_point ,   map<pair<int ,int >  , vector<int > >vector_weight_map)
+void print_extremal_point(vector<vector<int>>&extremal_point)
+{
+    int n = extremal_point.size();
+    int i;
+    
+    // int cnt = 0;
+    // cout<<"we are getting "<<n<<" extremal points\n";
+    cout<<"Extremal points are :- \n";
+    for(i=0; i<n; i++)
+    {
+        for(int j=0; j<extremal_point[i].size(); i++)
+        {
+            cout<<extremal_point[i][j]<<" ";
+        }
+        cout<<endl;
+    }
+}
+vector<vector<int>> BFS(vector<vector<int >> initial_three_point , vector<vector<int >>&graph,  map<pair<int ,int >  , vector<int > >vector_weight_map)
 {
 
-    //it will return the set of the extremal points 
+    //it will return the set of the extreaml points 
 
     //we wiil use the queue data structure for solving EST like we so BFS 
     //que.push({plane which are at infinite disatance })--> starting 
@@ -365,6 +362,7 @@ vector<vector<int>> BFS(vector<vector<int >> initial_three_point ,   map<pair<in
 
     //we also use chechker to keep track of the farthest we have calculated till now to avoid the 
     // repeatation and it will also increase the efficency of the code.
+
     vector<vector<int > > ans;
     queue<vector<vector<int >>> que;
     que.push(initial_three_point);
@@ -376,20 +374,33 @@ vector<vector<int>> BFS(vector<vector<int >> initial_three_point ,   map<pair<in
             vector<vector<int>>temp_three_point = que.front();
             que.pop();
             // first i have to calculate the fourth point by using the three_point 
-            // vector<int> find_fourth_point(vector<vector<int >>MST ,  map<pair<int ,int >  , vector<int > >vector_weight_map)
-            
+
+            // vector<int> find_normal_vector(vector<vector<int >> &three_points)
             //find the normal vector then--
+            vector<int>normal_vector = find_normal_vector(temp_three_point);
 
+            // map<pair<int ,int > , int > find_weightedSum(vector<vector<int >>MST,  map<pair<int ,int >  , vector<int > >vector_weight_map , vector<int>normal_vector)
             // then find the normalized weight then -- 
+            map<pair<int ,int > , int > normlized_weight;
+            normlized_weight = find_weightedSum(vector_weight_map , normal_vector);
 
+
+            // vector<vector<int >> find_MST(vector<vector<int > >&graph , map<pair<int ,int > , int > weightSum )
             // then find the MST
-            
-            //then find the fourth point --(done)
 
-            // generate_plane(fourth_point , three_point)
+            vector<vector<int>> set_of_edges_of_MST;
+            set_of_edges_of_MST = find_MST(graph , normlized_weight);
+            print_MST(set_of_edges_of_MST);
             
-            vector<int>fourth_point = find_fourth_point(MST , vector_weight_map);
+
+            // vector<int> find_fourth_point(vector<vector<int >>MST ,  map<pair<int ,int >  , vector<int > >vector_weight_map)
+            //then find the fourth point --(done)
+            vector<int>fourth_point = find_fourth_point(set_of_edges_of_MST , vector_weight_map);
+
+            // vector<vector<vector<int >>> generate_plane(vector<int>fourth_points , vector<vector<int > >three_point)
+            // generate_plane(fourth_point , three_point)
             vector<vector<vector<int>>>three_plane = generate_plane(fourth_point , temp_three_point);
+
             if(three_plane.size() == 1)
             {
                 ans.push_back(three_plane[0][0]);
@@ -408,8 +419,27 @@ vector<vector<int>> BFS(vector<vector<int >> initial_three_point ,   map<pair<in
 
 int main()
 {
-    std::ifstream myfile; myfile.open("text.txt");
+    int dimension;
+    cout<<"Enter the dimension of weight of the graph (number of attributes\n";
+    cin>>dimension;
+    int i;
+    vector<int>temp;
 
+    vector<vector<int>>initial_point;//we will take the inital point as an input and we will pass this initial point in
+    // the BFS()  fucntion 
+
+    cout<<"now enter the initial ponts\n";
+    for(i=0; i<dimension; i++)
+    {
+        temp.clear();
+        for(int j = 0; j<dimension; j++)
+        {
+            int val;
+            cin>>val;
+            temp.push_back(val);
+        }
+        initial_point.push_back(temp);
+    }
     vector<vector<int>>graph;//in this graph variable i will store the graph returned by the creat_graph function .
 
     map<pair<int ,int >  , vector<int > >vector_weight_map;//we will this as a reference the after graph will be created 
@@ -423,7 +453,56 @@ int main()
 
     vector<vector<int>> exrtimal_points;
 
-    exrtimal_points = BFS(graph , vector_weight_map);
+    exrtimal_points = BFS( initial_point,graph, vector_weight_map);
+    print_extremal_point(exrtimal_points);
+
+    return 0;
+}
+//graph input 1
+// 6 6 3
+// 0 4 1 3 1
+// 0 1 1 12 1
+// 0 2 1 1 43
+// 2 3 1 1 23
+// 2 5 1 15 90
+// 5 3 1 18 1
+
+// graph input 2
+// 7 9 3
+// 0 1 1 2 1
+// 0 4 3 4 6
+// 0 2 8 9 4
+// 0 3 9 5 3
+// 4 2 5 4 3
+// 4 6 2 1 8
+// 2 5 8 9 12
+// 2 3 2 4 6
+// 6 5 2 5 7
+
+// initail three points 
+// 100000 0 0
+// 0 100000 0
+// 0 0 100000 
+
+
+
+
+
+   // cout<<"value of lamda 1 is: "<<l1<<"\nvalue of lamda 2 is: "<<l2<<"\nvalue of lamda 3 is: "<<l3;
+    /* for example
+    x1=2;
+    y1=3;
+    z1=7;
+    x2=2;
+    y2=3;
+    z2=4;
+    x3=5;
+    y3=4;
+    z3=6;
+    then values of lamda are 
+    value of lamda 1 is: 0.316228
+    value of lamda 2 is: -0.948683
+    value of lamda 3 is: 0 */
 
 
     // to test the find_MST() function i am making the map(weightSum) 
@@ -455,24 +534,3 @@ int main()
 
     // find_MST();//it will calculate all the possible ST (probably it should be given in the questoin)
     // solve_EST();
-    
-    return 0;
-}
-
-// 6 6 3
-// 0 4 1 3 1
-// 0 1 1 12 1
-// 0 2 1 1 43
-// 2 3 1 1 23
-// 2 5 1 15 90
-// 5 3 1 18 1
-
-// 6 6 3
-
-// 6
-// 0 4 6
-// 0 1 5
-// 0 2 4
-// 2 3 1
-// 2 5 3
-// 5 3 2
