@@ -12,6 +12,7 @@
 #include <bits/stdc++.h>
 #include <iostream>
 using namespace  std;
+bool got_discarded_normal = false;
 vector<vector<double > > gereate_points_of_one_plane(vector<double >p1 , vector<double>p2 , vector<double>p3)
 {
     vector<vector<double>>ans;
@@ -50,9 +51,11 @@ vector<vector<vector<double >>> generate_plane(vector<double>fourth_points , vec
     temp.clear();
     temp = gereate_points_of_one_plane(fourth_points ,three_point[0] , three_point[1] );
     ans.push_back(temp);
+    temp.clear();
 
-     temp = gereate_points_of_one_plane(fourth_points ,three_point[1] , three_point[2] );
+    temp = gereate_points_of_one_plane(fourth_points ,three_point[1] , three_point[2] );
     ans.push_back(temp);
+    temp.clear();
 
     temp = gereate_points_of_one_plane(fourth_points ,three_point[0] , three_point[2] );
     ans.push_back(temp);
@@ -156,7 +159,10 @@ vector<double> find_normal_vector(vector<vector<double >> &three_points)
         cout<<"noraml vector are :- "<<l1<<" "<<l2<<" "<<l3<<endl;
     }
     else{
-        cout<<"Normal vector discarded\n";
+        cout<<"This noraml vector have been discarded :- "<<l1<<" "<<l2<<" "<<l3<<endl;
+        got_discarded_normal = true;
+        // cout<<"Normal vector discarded\n";
+        
     }
   
     return ans;
@@ -365,14 +371,20 @@ void print_extremal_point(vector<vector<double>>&extremal_point)
         cout<<"unfortunately no extremal points found\n";
         return ;
     }
+
+    ofstream MyFile("Extremal_point.txt");
+
     for(i=0; i<n; i++)
     {
         for(double j=0; j<extremal_point[i].size(); j++)
         {
             cout<<extremal_point[i][j]<<" ";
+            MyFile<<extremal_point[i][j]<<" ";
         }
         cout<<endl;
+        MyFile<<endl;
     }
+    MyFile.close();
 }
 vector<vector<double>> BFS(vector<vector<double >> initial_three_point , vector<vector<double >>&graph,  map<pair<double ,double >  , vector<double > >vector_weight_map)
 {
@@ -385,7 +397,14 @@ vector<vector<double>> BFS(vector<vector<double >> initial_three_point , vector<
 
     //we also use chechker to keep track of the farthest we have calculated till now to avoid the 
     // repeatation and it will also increase the efficency of the code.
+    
+    //variable declared that will be used to terminate the loop by force ...
+    double prevcnt = 0;
+    int cntgap = 0;
+    bool flag = false;
 
+    map<vector<double> , double>map1;
+    double no_of_extremal_point = 0;
     vector<vector<double > > ans;
     queue<vector<vector<double >>> que;
     que.push(initial_three_point);
@@ -402,6 +421,21 @@ vector<vector<double>> BFS(vector<vector<double >> initial_three_point , vector<
             // vector<double> find_normal_vector(vector<vector<double >> &three_points)
             //find the normal vector then--
             vector<double>normal_vector = find_normal_vector(temp_three_point);
+
+
+            //checking the repeatation of the normal
+            map<vector<double > , double > normal_checker;
+            if(normal_checker.find(normal_vector) == normal_checker.end())
+            {
+                normal_checker.insert({normal_vector , 1});   
+            }
+            else{
+                cout<<"normal vector is repeating ....\n";
+                continue;
+            }
+
+            //cheking for the repeatation of the plane 
+            map<vector<vector<double>> , double>plane_checker;
 
             // map<pair<double ,double > , double > find_weightedSum(vector<vector<double >>MST,  map<pair<double ,double >  , vector<double > >vector_weight_map , vector<double>normal_vector)
             // then find the normalized weight then -- 
@@ -428,20 +462,66 @@ vector<vector<double>> BFS(vector<vector<double >> initial_three_point , vector<
 
             // vector<vector<vector<double >>> generate_plane(vector<double>fourth_points , vector<vector<double > >three_point)
             // generate_plane(fourth_point , three_point)
-            vector<vector<vector<double>>>three_plane = generate_plane(fourth_point , temp_three_point);
-
+            vector<vector<vector<double>>>three_plane;
+            if(fourth_point[0] >=0  && fourth_point[1] >=0 && fourth_point[2] >=0)
+            {
+                three_plane = generate_plane(fourth_point , temp_three_point);
+            }
+            else{
+                continue;
+            }
+            
             if(three_plane.size() == 1)
             {
-                ans.push_back(three_plane[0][0]);
+                //here we are getting repeated ans so we need to check for that if it is already included in the ans 
+                // then we will not take it in the answer .
+                if(map1.find(three_plane[0][0]) == map1.end())
+                {
+                    ans.push_back(three_plane[0][0]);
+                    map1.insert({three_plane[0][0] , 1});
+                }
+                
             }
             else{
                 for(double i = 0; i<three_plane.size(); i++)
                 {
-                    que.push(three_plane[i]);
+                    if(plane_checker.find(three_plane[i]) == plane_checker.end())
+                    {
+                        plane_checker.insert({three_plane[i] , 1});
+                        que.push(three_plane[i]);
+                    }
+                    
                 }
             }
+            cout<<"Number of extremal we got is :- "<<map1.size()<<endl;
+            //every time i am printing the extremal point to see till now how many extremal point we have 
+            // got 
+
+            print_extremal_point(ans);
+            
+            //initially flag is false
+            if(!flag){prevcnt = ans.size(); flag = true;}
+            if(prevcnt == ans.size()){ 
+                cntgap++;
+            }
+            else{
+                cntgap = 0;
+                prevcnt = ans.size();
+            }
+
+
+            // cntgap == 1000 ||  got_discarded_normal
+            if( cntgap == 1000 ){
+                flag  = false;
+                break;
+            }
+
+
         }
+        if(!flag){break;}
     }
+    no_of_extremal_point = map1.size();
+    cout<<"number of extremal points we got :- "<<no_of_extremal_point<<endl;
     return ans;
 }
 
@@ -483,18 +563,24 @@ int main()
     vector<vector<double>> exrtimal_points;
 
     exrtimal_points = BFS( initial_point,graph, vector_weight_map);
-    print_extremal_point(exrtimal_points);
+
+    // print_extremal_point(exrtimal_points);
+
+    //implement the file system here for appending the data in the file system.
 
     return 0;
 }
 //graph input 1
-// 6 6 3
-// 0 4 1 3 19
-// 0 1 12 12 1
-// 0 2 178 1 43
-// 2 3 1 1 23
-// 2 5 132 15 90
-// 5 3 1 18 1000
+// 6 9 3
+// 0 4 1 3 1
+// 0 1 1 1 1
+// 0 2 1 1 4
+// 2 3 1 1 2
+// 2 5 1 1 9
+// 5 3 1 1 1
+// 1 2 4 7 6
+// 1 3 3 9 5
+// 2 4 5 7 1
 
 // graph input 2
 // 7 9 3
@@ -509,16 +595,30 @@ int main()
 // 6 5 234 5 789
 
 // initail three points 
-// 1000 0 0
-// 0 10000 0
-// 0 0 1000
-
-// initail three points 
-// 234 23 656
-// 56 567 234
-// 23 789 100 
+// 1000000000 0 0
+// 0 1000000000 0
+// 0 0 1000000000
 
 
+// graph input 3
+// 10 17 3
+// 0 1 2 2 4
+// 0 3 2 3 8 
+// 0 4 2 1 2
+// 1 6 1 2 8
+// 1 2 9 3 4
+// 1 5 3 4 8
+// 2 5 2 6 5
+// 2 9 1 3 2
+// 3 7 9 7 4
+// 3 8 4 3 9
+// 4 8 9 1 1
+// 5 9 2 1 9
+// 7 8 2 3 8
+// 8 9 9 1 3
+// 1 3 6 4 3
+// 3 4 2 4 3
+// 5 6 4 9 7
 
 
    // cout<<"value of lamda 1 is: "<<l1<<"\nvalue of lamda 2 is: "<<l2<<"\nvalue of lamda 3 is: "<<l3;
@@ -562,8 +662,6 @@ int main()
 
     // print_MST(MST_edge);
 
-
-
-
     // find_MST();//it will calculate all the possible ST (probably it should be given in the questoin)
     // solve_EST();
+
